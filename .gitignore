@@ -14,7 +14,11 @@ tools/_art_out/
 .kg/
 **/knowledge-graph/data/
 **/knowledge-graph/*.db
+**/knowledge-graph/*.db-shm
+**/knowledge-graph/*.db-wal
 **/knowledge-graph/*.sqlite*
+# embedding 模型快取（~560MB，釘在專案層，不版控）
+**/knowledge-graph/.cache/
 
 # === 環境與密鑰 ===
 .env

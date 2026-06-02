@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "knowledge-graph": {
+      "command": "node",
+      "args": ["C:/Users/91006/Desktop/QuickSlot/mcp/knowledge-graph/main.js"],
+      "env": {
+        "HF_HOME": "C:/Users/91006/Desktop/QuickSlot/mcp/knowledge-graph/.cache",
+        "TRANSFORMERS_CACHE": "C:/Users/91006/Desktop/QuickSlot/mcp/knowledge-graph/.cache"
+      }
+    }
+  }
+}
