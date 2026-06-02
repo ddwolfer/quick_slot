@@ -59,9 +59,9 @@ export class WinPresenter {
         color: 0xffe14d,
       });
     }
-    // 連線
+    // 連線（payline 才畫；ways 的 line < 0,只高亮格子不畫連線避免亂竄）
     const pts = e.positions.map(([reel, row]) => this.center(reel, row));
-    if (pts.length > 1) {
+    if (e.line >= 0 && pts.length > 1) {
       g.moveTo(pts[0].x, pts[0].y);
       for (let i = 1; i < pts.length; i++) g.lineTo(pts[i].x, pts[i].y);
       g.stroke({ width: 5, color: 0xffe14d, alpha: 0.9 });

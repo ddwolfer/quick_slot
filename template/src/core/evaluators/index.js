@@ -1,5 +1,6 @@
 // 依 mechanic 選 evaluator。新增玩法時在此註冊。
 import { evaluatePaylines } from './payline.js';
+import { evaluateWays } from './ways.js';
 
 /**
  * @param {import('../types').Mechanic} mechanic
@@ -10,7 +11,7 @@ export function getEvaluator(mechanic) {
     case 'payline':
       return evaluatePaylines;
     case 'ways':
-      throw new Error('ways evaluator 尚未實作（M3 升級項）');
+      return evaluateWays;
     case 'cluster':
       throw new Error('cluster evaluator 尚未實作（M3 升級項，含 tumble）');
     default:
