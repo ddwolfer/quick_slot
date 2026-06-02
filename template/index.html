@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <title>QuickSlot</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        height: 100%;
+        background: #0a0c12;
+        font-family: Arial, "Microsoft JhengHei", sans-serif;
+        overflow: hidden;
+      }
+      #stage-wrap {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #game-root canvas { display: block; }
+
+      #ui {
+        position: absolute;
+        left: 50%;
+        bottom: 3vh;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 10px 18px;
+        background: rgba(20, 24, 36, 0.92);
+        border: 1px solid #2c3450;
+        border-radius: 14px;
+        color: #e8ecf6;
+        user-select: none;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+      }
+      #ui .lbl { font-size: 12px; color: #8a93ad; display: block; }
+      #ui .ui-left, #ui .bet-box { min-width: 84px; text-align: center; }
+      #ui #balance, #ui #bet { font-size: 22px; font-weight: 900; }
+      #balance.flash { color: #ff5d5d; }
+      #ui .ui-center { display: flex; align-items: center; gap: 10px; }
+      button {
+        font-family: inherit;
+        cursor: pointer;
+        border: none;
+        border-radius: 10px;
+        color: #fff;
+        font-weight: 800;
+      }
+      #bet-dec, #bet-inc {
+        width: 40px; height: 40px; font-size: 22px;
+        background: #2c3450;
+      }
+      #spin {
+        width: 120px; height: 56px; font-size: 22px; letter-spacing: 1px;
+        background: linear-gradient(180deg, #ffd84d, #f0a51e);
+        color: #2a1c00;
+      }
+      #spin.disabled { filter: grayscale(0.7) brightness(0.7); cursor: default; }
+      #paytable-btn { height: 40px; padding: 0 14px; background: #2c3450; font-size: 14px; }
+
+      #paytable-modal {
+        position: absolute; inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 10;
+      }
+      #paytable-modal.hidden { display: none; }
+      .modal-card {
+        background: #1b2030; color: #e8ecf6;
+        border: 1px solid #2c3450; border-radius: 16px;
+        padding: 24px 28px; width: min(440px, 86vw); max-height: 80vh; overflow: auto;
+      }
+      .modal-card h2 { margin: 0 0 14px; color: #ffe14d; }
+      .pt-row {
+        display: grid; grid-template-columns: 70px 70px 1fr; gap: 10px;
+        align-items: center; padding: 8px 0; border-bottom: 1px solid #2c3450;
+      }
+      .pt-kind { font-size: 12px; color: #8a93ad; }
+      .pt-pay { font-size: 13px; text-align: right; }
+      #paytable-close { margin-top: 16px; height: 40px; padding: 0 18px; background: #2c3450; }
+    </style>
+  </head>
+  <body>
+    <div id="stage-wrap">
+      <div id="game-root"></div>
+      <div id="ui">
+        <div class="ui-left"><span class="lbl">餘額</span><span id="balance">0.00</span></div>
+        <div class="ui-center">
+          <button id="bet-dec">−</button>
+          <div class="bet-box"><span class="lbl">押注</span><span id="bet">1.00</span></div>
+          <button id="bet-inc">+</button>
+        </div>
+        <button id="spin">SPIN</button>
+        <button id="paytable-btn">賠付表</button>
+      </div>
+    </div>
+
+    <div id="paytable-modal" class="hidden">
+      <div class="modal-card">
+        <h2>賠付表</h2>
+        <div id="paytable-content"></div>
+        <button id="paytable-close">關閉</button>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

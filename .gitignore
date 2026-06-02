@@ -1,0 +1,35 @@
+# === 相依與建置產物 ===
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# === 美術產生暫存（codex-imagegen 的 staging，落地後才進 public/assets） ===
+**/staging/
+**/_staging/
+out/staging/
+tools/_art_out/
+
+# === Knowledge Graph 資料（MCP 執行期落地，不版控） ===
+.kg/
+**/knowledge-graph/data/
+**/knowledge-graph/*.db
+**/knowledge-graph/*.sqlite*
+
+# === 環境與密鑰 ===
+.env
+.env.*
+!.env.example
+
+# === 日誌與暫存 ===
+*.log
+npm-debug.log*
+.tmp/
+tmp/
+
+# === 編輯器 / 作業系統 ===
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

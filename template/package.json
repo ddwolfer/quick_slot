@@ -1,0 +1,20 @@
+{
+  "name": "quickslot",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "輕量本地 PixiJS slot 試玩框架（config 驅動，玩法無關核心）",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "pixi.js": "^8.6.6"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  }
+}
