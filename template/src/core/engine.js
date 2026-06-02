@@ -33,7 +33,8 @@ export function spin(cfg, rng, bet) {
   const totalBet = bet ?? cfg.bet.default;
   const board = drawBoard(cfg, rng);
   const evaluate = getEvaluator(cfg.mechanic);
-  const { events, totalWin } = evaluate(board, cfg, totalBet);
+  // rng 一併傳入:payline/ways 會忽略,cluster 用它做 tumble 補新(數學同源)。
+  const { events, totalWin } = evaluate(board, cfg, totalBet, rng);
   return {
     board,
     totalWin,

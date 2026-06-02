@@ -77,6 +77,62 @@ class ReelView {
     // 落定：重建為靜止 final（index 0..rows-1）
     this.renderStatic(final);
   }
+
+  /**
+   * cluster tumble：消除 removedRows、存活下落、頂端補新到 newColumn。
+   * newColumn 約定為 [新符號..., 存活符號...]（與 cluster.collapseRefill 一致）。
+   */
+  async tumble(removedRows: number[], newColumn: string[], ticker: Ticker, durationMs = 420) {
+    const removed = new Set(removedRows);
+    const newCount = removedRows.length;
+    if (newCount === 0) {
+      this.renderStatic(newColumn);
+      return;
+    }
+
+    // 目前靜止狀態：child index = row
+    const current = this.strip.children.slice() as Container[];
+    // 消除中獎格（已由 TumbleLayer 先播爆破，這裡直接移除）
+    for (const row of removedRows) {
+      const ch = current[row];
+      if (ch) {
+        this.strip.removeChild(ch);
+        ch.destroy();
+      }
+    }
+
+    type Anim = { c: Container; y0: number; y1: number };
+    const anims: Anim[] = [];
+
+    // 存活格（依 row 升序）落到底部 [newCount..rows-1]
+    const kept: Container[] = [];
+    for (let row = 0; row < this.rows; row++) {
+      if (!removed.has(row) && current[row]) kept.push(current[row]);
+    }
+    kept.forEach((c, i) => {
+      anims.push({ c, y0: c.y, y1: (newCount + i) * this.cellH });
+    });
+
+    // 新符號自頂端上方落入 [0..newCount-1]
+    for (let i = 0; i < newCount; i++) {
+      const id = newColumn[i];
+      const c = makeSymbol(this.symMap.get(id), id, this.cellH);
+      c.y = (i - newCount) * this.cellH; // 起點在可見區上方
+      this.strip.addChild(c);
+      anims.push({ c, y0: c.y, y1: i * this.cellH });
+    }
+
+    await tween(
+      ticker,
+      durationMs,
+      (t) => {
+        for (const a of anims) a.c.y = a.y0 + (a.y1 - a.y0) * t;
+      },
+      easeOutBack
+    );
+
+    this.renderStatic(newColumn);
+  }
 }
 
 export class Reels {
@@ -95,6 +151,18 @@ export class Reels {
   /** 全部轉軸到指定盤面，左到右錯位停止；全部停妥才 resolve */
   async spin(ticker: Ticker, board: Board) {
     const tasks = this.reels.map((rv, i) => rv.spinTo(board[i], ticker, i * 120, 650 + i * 70));
+    await Promise.all(tasks);
+  }
+
+  /** cluster tumble：依 removed 分組到各軸,平行播消除+下落+補新;全部落定才 resolve */
+  async tumble(removed: [number, number][], newBoard: Board, ticker: Ticker) {
+    const byReel = new Map<number, number[]>();
+    for (const [reel, row] of removed) {
+      const arr = byReel.get(reel) ?? [];
+      arr.push(row);
+      byReel.set(reel, arr);
+    }
+    const tasks = this.reels.map((rv, r) => rv.tumble(byReel.get(r) ?? [], newBoard[r], ticker));
     await Promise.all(tasks);
   }
 

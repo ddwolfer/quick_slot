@@ -24,6 +24,8 @@ export interface GameConfig {
   /** 每軸符號帶 reelStrips[reel] = string[] */
   reelStrips: string[][];
   freeSpins?: { trigger: number; count: number };
+  /** cluster 專用:成群最小連結數(預設 5) */
+  minCluster?: number;
 }
 
 /** board[reel][row] */
@@ -46,10 +48,18 @@ export type ScatterWinEvent = {
   amount: number;
 };
 
+/** cluster/tumble:一次消除+補新後的盤面。removed=被消除格,board=補新後新盤面 */
+export type TumbleEvent = {
+  type: 'tumble';
+  removed: [number, number][];
+  board: Board;
+};
+
 export type GameEvent =
   | { type: 'reveal'; board: Board }
   | WinEvent
   | ScatterWinEvent
+  | TumbleEvent
   | { type: 'totalWin'; amount: number };
 
 export interface SpinResult {
@@ -58,8 +68,13 @@ export interface SpinResult {
   totalWin: number;
 }
 
+/**
+ * rng 為選配:payline/ways 不需要;cluster 需要(tumble 補新要抽符號)。
+ * engine.spin() 一律會把 rng 傳入,確保 cluster 補新與整體數學同源。
+ */
 export type Evaluator = (
   board: Board,
   cfg: GameConfig,
-  totalBet: number
+  totalBet: number,
+  rng?: () => number
 ) => { events: GameEvent[]; totalWin: number };

@@ -7,6 +7,7 @@ import { loadGameAssets } from './assets/manifest';
 import { setSymbolTextures } from './render/symbols';
 import { Reels } from './render/reels';
 import { WinPresenter } from './render/winPresenter';
+import { TumbleLayer } from './render/TumbleLayer';
 import { playEvents } from './render/eventPlayer';
 import { Controls } from './ui/controls';
 
@@ -96,6 +97,12 @@ async function main() {
   presenter.overlay.y = frameY;
   app.stage.addChild(presenter.overlay);
 
+  // 可插拔的 cluster/tumble 呈現層（payline/ways 模式下完全 dormant）
+  const tumbleLayer = new TumbleLayer(CELL, app.ticker);
+  tumbleLayer.overlay.x = frameX;
+  tumbleLayer.overlay.y = frameY;
+  app.stage.addChild(tumbleLayer.overlay);
+
   const winText = presenter.getWinText();
   winText.x = GAME_W / 2;
   winText.y = frameY + reelsH / 2;
@@ -116,7 +123,7 @@ async function main() {
     controls.refresh();
 
     const result = spin(config, rng, controls.bet);
-    await playEvents(result.events, reels, presenter, app.ticker);
+    await playEvents(result.events, reels, presenter, app.ticker, tumbleLayer);
 
     controls.balance += result.totalWin;
     controls.refresh();
