@@ -29,7 +29,11 @@ RTP 校正迴圈。核心心法:**RTP 與所有 pay 成線性**——離目標�
    - **ways**:`lineBet = totalBet / (paylines ?? 20)`,`pay × ways × lineBet`。ways 會相乘放大,通常 RTP 比 payline 高很多(實測約 300%+),需把 pay 砍到約 1/8 再線性收。
    - **cluster**:`pay × totalBet`,門檻制(取 pay 中鍵 ≤ 群大小的最大值),連鎖會疊加;先設好 `minCluster` 與群 paytable 再對。用覆寫 mechanic 的 sim 量(見下)。
 
-5. **量非預設玩法**:`game.config.json` 預設 `payline`;要量 ways/cluster,寫個一次性 node 片段把 `cfg.mechanic` 覆寫後丟進 `spin()`(import `template/src/core/engine.js`),或暫改 config 再改回。
+5. **量非預設玩法**:`sim.mjs` 第三個參數可覆寫玩法,不必改 config:
+   ```bash
+   node tools/sim.mjs 500000 ways      # 以 ways 量
+   node tools/sim.mjs 200000 cluster   # 以 cluster 量(另報 avg cascade)
+   ```
 
 ## 驗收
 
