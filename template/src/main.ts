@@ -1,8 +1,10 @@
-import { Application, Graphics, Text, TextStyle } from 'pixi.js';
+import { Application, Graphics, Sprite, Text, TextStyle } from 'pixi.js';
 import rawConfig from '../game.config.json';
 import type { GameConfig, Board } from './core/types';
 import { spin, drawBoard } from './core/engine.js';
 import { makeRng } from './core/rng.js';
+import { loadGameAssets } from './assets/manifest';
+import { setSymbolTextures } from './render/symbols';
 import { Reels } from './render/reels';
 import { WinPresenter } from './render/winPresenter';
 import { playEvents } from './render/eventPlayer';
@@ -29,27 +31,56 @@ async function main() {
   fitCanvas(app.canvas);
   window.addEventListener('resize', () => fitCanvas(app.canvas));
 
-  // 背景 + 盤面框（placeholder，之後換美術）
+  // 預載美術(有 public/assets/manifest.json 才載;沒有就 placeholder 模式,零 404)
+  const assets = await loadGameAssets(config);
+  setSymbolTextures(assets.symbols);
+
   const reelsW = config.grid.reels * CELL;
   const reelsH = config.grid.rows * CELL;
   const frameX = GAME_W / 2 - reelsW / 2;
   const frameY = GAME_H / 2 - reelsH / 2;
 
-  const bg = new Graphics();
-  bg.rect(0, 0, GAME_W, GAME_H).fill(0x10131c);
-  bg.roundRect(frameX - 24, frameY - 24, reelsW + 48, reelsH + 48, 20)
-    .fill(0x1b2030)
-    .stroke({ width: 4, color: 0x2c3450 });
-  app.stage.addChild(bg);
+  // 背景:有美術用 Sprite 鋪滿,否則 placeholder 純色
+  if (assets.background) {
+    const bgSprite = new Sprite(assets.background);
+    bgSprite.width = GAME_W;
+    bgSprite.height = GAME_H;
+    app.stage.addChild(bgSprite);
+  } else {
+    const bgFill = new Graphics();
+    bgFill.rect(0, 0, GAME_W, GAME_H).fill(0x10131c);
+    app.stage.addChild(bgFill);
+  }
 
-  const title = new Text({
-    text: config.theme.toUpperCase(),
-    style: new TextStyle({ fontFamily: 'Arial', fontSize: 44, fontWeight: '900', fill: 0xffe14d }),
-  });
-  title.anchor.set(0.5, 0);
-  title.x = GAME_W / 2;
-  title.y = 44;
-  app.stage.addChild(title);
+  // 盤面框(無論有無美術都留,框住轉軸區)
+  const frame = new Graphics();
+  frame
+    .roundRect(frameX - 24, frameY - 24, reelsW + 48, reelsH + 48, 20)
+    .fill({ color: 0x1b2030, alpha: assets.background ? 0.55 : 1 })
+    .stroke({ width: 4, color: 0x2c3450 });
+  app.stage.addChild(frame);
+
+  // 標題:有 logo 美術用 Sprite,否則文字
+  if (assets.logo) {
+    const logo = new Sprite(assets.logo);
+    const maxW = reelsW + 48;
+    const k = Math.min(maxW / assets.logo.width, 120 / assets.logo.height);
+    logo.width = assets.logo.width * k;
+    logo.height = assets.logo.height * k;
+    logo.anchor.set(0.5, 0);
+    logo.x = GAME_W / 2;
+    logo.y = 16;
+    app.stage.addChild(logo);
+  } else {
+    const title = new Text({
+      text: config.theme.toUpperCase(),
+      style: new TextStyle({ fontFamily: 'Arial', fontSize: 44, fontWeight: '900', fill: 0xffe14d }),
+    });
+    title.anchor.set(0.5, 0);
+    title.x = GAME_W / 2;
+    title.y = 44;
+    app.stage.addChild(title);
+  }
 
   // 初始盤面
   const rng = makeRng();
