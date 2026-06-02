@@ -8,6 +8,7 @@ import { setSymbolTextures } from './render/symbols';
 import { Reels } from './render/reels';
 import { WinPresenter } from './render/winPresenter';
 import { TumbleLayer } from './render/TumbleLayer';
+import { SoundManager } from './render/sound';
 import { playEvents } from './render/eventPlayer';
 import { Controls } from './ui/controls';
 
@@ -35,6 +36,13 @@ async function main() {
   // 預載美術(有 public/assets/manifest.json 才載;沒有就 placeholder 模式,零 404)
   const assets = await loadGameAssets(config);
   setSymbolTextures(assets.symbols);
+
+  // 音效(有 public/assets/audio/manifest.json 才出聲;沒有全程靜音)
+  const soundMgr = new SoundManager();
+  await soundMgr.load();
+
+  const muteBtn = document.getElementById('mute') as HTMLButtonElement | null;
+  if (muteBtn) muteBtn.onclick = () => (muteBtn.textContent = soundMgr.toggleMute() ? '🔇' : '🔊');
 
   const reelsW = config.grid.reels * CELL;
   const reelsH = config.grid.rows * CELL;
@@ -87,7 +95,9 @@ async function main() {
   const rng = makeRng();
   const initial = drawBoard(config, rng) as Board;
 
-  const reels = new Reels(config, CELL, initial);
+  const reels = new Reels(config, CELL, initial, {
+    onReelStop: () => soundMgr.play('sfx_reel_stop'),
+  });
   reels.container.x = frameX;
   reels.container.y = frameY;
   app.stage.addChild(reels.container);
@@ -122,9 +132,15 @@ async function main() {
     controls.balance -= controls.bet;
     controls.refresh();
 
+    soundMgr.startBgm(); // 首次互動才啟動 BGM(瀏覽器 autoplay 政策)
+    soundMgr.play('sfx_spin');
+
     const result = spin(config, rng, controls.bet);
     await playEvents(result.events, reels, presenter, app.ticker, tumbleLayer);
 
+    if (result.totalWin > 0) {
+      soundMgr.play(result.totalWin >= controls.bet * 20 ? 'sfx_win_big' : 'sfx_win_small');
+    }
     controls.balance += result.totalWin;
     controls.refresh();
     spinning = false;

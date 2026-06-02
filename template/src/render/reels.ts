@@ -45,7 +45,13 @@ class ReelView {
     return this.ids[Math.floor(Math.random() * this.ids.length)];
   }
 
-  async spinTo(final: string[], ticker: Ticker, delayMs: number, durationMs: number) {
+  async spinTo(
+    final: string[],
+    ticker: Ticker,
+    delayMs: number,
+    durationMs: number,
+    onStop?: () => void
+  ) {
     if (delayMs > 0) await wait(delayMs);
 
     // 組 strip：[頂端 buffer][final...][隨機...]
@@ -76,6 +82,7 @@ class ReelView {
 
     // 落定：重建為靜止 final（index 0..rows-1）
     this.renderStatic(final);
+    onStop?.(); // 解耦掛點：每軸停下時觸發(如 reel-stop 音效)
   }
 
   /**
@@ -138,8 +145,10 @@ class ReelView {
 export class Reels {
   container = new Container();
   private reels: ReelView[] = [];
+  private onReelStop?: () => void;
 
-  constructor(cfg: GameConfig, cellSize: number, initial: Board) {
+  constructor(cfg: GameConfig, cellSize: number, initial: Board, opts?: { onReelStop?: () => void }) {
+    this.onReelStop = opts?.onReelStop;
     for (let r = 0; r < cfg.grid.reels; r++) {
       const rv = new ReelView(cfg, cellSize, initial[r]);
       rv.view.x = r * cellSize;
@@ -150,7 +159,9 @@ export class Reels {
 
   /** 全部轉軸到指定盤面，左到右錯位停止；全部停妥才 resolve */
   async spin(ticker: Ticker, board: Board) {
-    const tasks = this.reels.map((rv, i) => rv.spinTo(board[i], ticker, i * 120, 650 + i * 70));
+    const tasks = this.reels.map((rv, i) =>
+      rv.spinTo(board[i], ticker, i * 120, 650 + i * 70, this.onReelStop)
+    );
     await Promise.all(tasks);
   }
 
