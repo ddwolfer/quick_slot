@@ -1,0 +1,16 @@
+# 統一行尾為 LF,避免跨平台 CRLF churn 與編輯器殘留問題
+* text=auto eol=lf
+
+# 二進位資產:不做行尾轉換、不做 diff
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.webp binary
+*.gif  binary
+*.mp3  binary
+*.ogg  binary
+*.wav  binary
+*.m4a  binary
+
+# Spine 輸出:.json/.atlas 視為文字(LF),.png 已在上面標 binary
+*.atlas text eol=lf
