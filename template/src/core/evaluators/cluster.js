@@ -38,8 +38,11 @@ export function evaluateCluster(board, cfg, totalBet, rng) {
     const clusters = findClusters(working, reels, rows, minCluster, isWild, isScatter);
     if (clusters.length === 0) break;
 
-    /** @type {[number, number][]} */
-    const removedAll = [];
+    // wild 可同時屬多個 base 群,cl.cells 會重複到同一個 wild 格——
+    // 用 Map 去重,確保 tumble 的 removed 每格只出現一次(否則 render 端
+    // newCount 會多算、survivor/fresh 落錯列,且同一 Container 被 destroy 兩次)。
+    /** @type {Map<string, [number, number]>} */
+    const removedMap = new Map();
     for (const cl of clusters) {
       const pay = clusterPay(byId[cl.symbolId], cl.size);
       if (pay > 0) {
@@ -54,8 +57,9 @@ export function evaluateCluster(board, cfg, totalBet, rng) {
           amount,
         });
       }
-      for (const c of cl.cells) removedAll.push(c);
+      for (const c of cl.cells) removedMap.set(c[0] + ',' + c[1], c);
     }
+    const removedAll = [...removedMap.values()];
 
     const newBoard = collapseRefill(working, removedAll, cfg, rand);
     events.push({ type: 'tumble', removed: removedAll, board: newBoard });

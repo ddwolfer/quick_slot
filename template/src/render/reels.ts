@@ -90,8 +90,10 @@ class ReelView {
    * newColumn 約定為 [新符號..., 存活符號...]（與 cluster.collapseRefill 一致）。
    */
   async tumble(removedRows: number[], newColumn: string[], ticker: Ticker, durationMs = 420) {
+    // 用 Set 去重：newCount 與消除迴圈都以「唯一列」為準,避免重複列導致
+    // 落列錯位或同一 Container 被 destroy 兩次（cluster 的 wild 可能重複帶入）。
     const removed = new Set(removedRows);
-    const newCount = removedRows.length;
+    const newCount = removed.size;
     if (newCount === 0) {
       this.renderStatic(newColumn);
       return;
@@ -100,7 +102,7 @@ class ReelView {
     // 目前靜止狀態：child index = row
     const current = this.strip.children.slice() as Container[];
     // 消除中獎格（已由 TumbleLayer 先播爆破，這裡直接移除）
-    for (const row of removedRows) {
+    for (const row of removed) {
       const ch = current[row];
       if (ch) {
         this.strip.removeChild(ch);
