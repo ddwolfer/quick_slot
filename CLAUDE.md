@@ -46,6 +46,6 @@
 
 提交前對照 `.claude/skills/quick-slot-review`,逐項檢查功能與手感(非合規)。
 
-## Knowledge Graph(待接)
+## Knowledge Graph(已接,專案層)
 
-KG(`knowledge-graph` MCP)用來跨次累積做 slot 的踩坑與套路。每做完一小段(一個 bug、一次 RTP 調校、一條 codex prompt 心得)就 `store_knowledge`;動手前先 `search_memory`。接法見 `進度與驗收.md` 的 KG 段落。**比賽期間不用 agent-bridge 多 agent 團隊**(過度工程);美術用 Claude Code 內建 subagent 平行呼叫 codex 即可。
+KG(`knowledge-graph` MCP)用來跨次累積做 slot 的踩坑與套路。已整進 repo(`mcp/knowledge-graph/` + 根 `.mcp.json`,**專案層、不裝全域**);啟用需在 `mcp/knowledge-graph/` 跑一次 `npm install` + 重啟 Claude Code,細節見 `docs/knowledge-graph.md`。用法走 `kg-log` skill:每做完一小段(一個 bug、一次 RTP 調校、一條 codex prompt 心得)就 `store_knowledge`;動手前先 `search_memory`。**比賽期間不用 agent-bridge 多 agent 團隊**(過度工程);美術用 Claude Code 內建 subagent 平行呼叫 codex 即可。
