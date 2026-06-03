@@ -42,8 +42,14 @@ $PY "OLYMPUS GODS slot game logo, golden greek lettering, ornate emblem, transpa
 
 ## 落地（換掉 placeholder 色塊）
 
-1. 從 staging 挑好的 PNG，命名為 `H1.png`…`S.png` 放 `template/public/assets/`。
-2. 在 `template/src/render/symbols.ts` 把 `makeSymbol` 內的 `Graphics` 色塊改成
-   `Sprite.from(Assets 載入的貼圖)`；用 PixiJS `Assets.load` 在 `main.ts` 啟動時預載
-   `public/assets/{id}.png`，傳進 `Reels`。
-3. 背景 sprite 取代 `main.ts` 內的 `bg` 色塊；logo 疊在 title 位置。
+> 程式已內建「manifest 驅動」drop-in,**不必再改任何程式碼**——`symbols.ts` 已有
+> Sprite 路徑、`main.ts` 已用 `loadGameAssets` 預載並自動接背景/ logo。落地只要兩步:
+
+1. 從 staging 挑好的 PNG,命名 `H1.png`…`S.png`、`bg.png`、`logo.png`,放 `template/public/assets/`。
+2. 寫 `template/public/assets/manifest.json`:
+   ```json
+   { "symbols": ["H1","H2","H3","H4","L1","L2","L3","L4","W","S"], "background": "bg.png", "logo": "logo.png" }
+   ```
+3. `npm run dev` 確認:符號變圖、背景/ logo 出現;缺圖的符號自動 fallback 色塊。
+
+(完整步驟、平行 subagent、驗收見 `gen-slot-art` skill。)
